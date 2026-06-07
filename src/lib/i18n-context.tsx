@@ -45,6 +45,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
+    document.title = locale === "zh" ? "日历打卡" : "Calendar Check-in";
   }, [locale]);
 
   const setLocale = useCallback((l: Locale) => {
