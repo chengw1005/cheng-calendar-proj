@@ -24,7 +24,7 @@ export async function GET() {
 
   try {
     const supabase = getSupabaseClient();
-    const { error } = await supabase.from("entries").select("id").limit(1);
+    const { error } = await supabase.from("calendar_entries").select("id").limit(1);
     if (error) {
       status.error = error.message;
     } else {
