@@ -244,11 +244,11 @@ export default function CalendarPage() {
         >
           <div
             className="card dateModalSheet"
-            style={{ width: "100%", maxWidth: "520px", alignSelf: isMobile ? "end" : "center" }}
+            style={{ width: "100%", maxWidth: "420px", justifySelf: "center", alignSelf: "center" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ marginTop: 0 }}>日期: {selectedDate}</h3>
-            <div style={{ display: "grid", gap: "0.75rem" }}>
+            <h3 style={{ marginTop: 0, marginBottom: "0.5rem" }}>日期: {selectedDate}</h3>
+            <div style={{ display: "grid", gap: "2px" }}>
               {activities.map((activity) => {
                 const currentEntry = selectedEntryByActivityId.get(activity.id);
                 const isMarked = Boolean(currentEntry);
@@ -259,19 +259,26 @@ export default function CalendarPage() {
                 return (
                   <div
                     key={activity.id}
-                    className="card"
-                    style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "0.35rem 0.4rem",
+                      borderRadius: "6px",
+                      background: isMarked ? "#f0fdf4" : "transparent",
+                    }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                      <span className="dot" style={{ background: activity.color, marginTop: 0 }} />
-                      <div>{activity.name}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: activity.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: "0.9rem" }}>{activity.name}</span>
                     </div>
                     <button
                       type="button"
                       className={isMarked ? "danger" : undefined}
+                      style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem" }}
                       onClick={action}
                     >
-                      {isMarked ? "删除标记" : "添加标记"}
+                      {isMarked ? "取消" : "标记"}
                     </button>
                   </div>
                 );
