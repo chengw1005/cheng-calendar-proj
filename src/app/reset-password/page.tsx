@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useI18n } from "@/lib/i18n-context";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export default function ResetPasswordPage() {
+  const { t } = useI18n();
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -18,7 +20,7 @@ export default function ResetPasswordPage() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("两次输入的密码不一致");
+      setError(t("reset.mismatch"));
       return;
     }
 
@@ -41,12 +43,12 @@ export default function ResetPasswordPage() {
 
   return (
     <main className="authCard card">
-      <h2 style={{ marginTop: 0, textAlign: "center" }}>重置密码</h2>
+      <h2 style={{ marginTop: 0, textAlign: "center" }}>{t("reset.title")}</h2>
 
       <form onSubmit={(e) => void handleReset(e)} className="authForm">
         <input
           type="password"
-          placeholder="新密码 (至少 6 位)"
+          placeholder={t("reset.newPwd")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -54,7 +56,7 @@ export default function ResetPasswordPage() {
         />
         <input
           type="password"
-          placeholder="确认新密码"
+          placeholder={t("reset.confirmPwd")}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
@@ -62,12 +64,12 @@ export default function ResetPasswordPage() {
         />
         {error ? <p className="authError">{error}</p> : null}
         <button type="submit" disabled={loading}>
-          {loading ? "重置中..." : "重置密码"}
+          {loading ? t("reset.loading") : t("reset.submit")}
         </button>
       </form>
 
       <div className="authLinks">
-        <Link href="/login">返回登录</Link>
+        <Link href="/login">{t("reset.backToLogin")}</Link>
       </div>
     </main>
   );

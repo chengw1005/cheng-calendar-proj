@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { useI18n } from "@/lib/i18n-context";
+
 type Activity = {
   id: string;
   name: string;
@@ -10,6 +12,7 @@ type Activity = {
 };
 
 export default function ActivitiesPage() {
+  const { t, tActivity } = useI18n();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
   const [activityNameInput, setActivityNameInput] = useState("");
@@ -94,34 +97,34 @@ export default function ActivitiesPage() {
 
   return (
     <main className="card">
-      <h2>活动管理</h2>
-      <p>在这里新增、编辑或删除预定义活动。删除活动会同时删除该活动已有的日历标记。</p>
+      <h2>{t("act.title")}</h2>
+      <p>{t("act.desc")}</p>
 
       <section className="card" style={{ borderStyle: "dashed", marginBottom: "1rem" }}>
-        <h3 style={{ marginTop: 0 }}>{editingActivityId ? "编辑活动" : "新增活动"}</h3>
+        <h3 style={{ marginTop: 0 }}>{editingActivityId ? t("act.editTitle") : t("act.addTitle")}</h3>
         <div className="controls">
           <input
             value={activityNameInput}
             onChange={(e) => setActivityNameInput(e.target.value)}
-            placeholder="活动名称"
+            placeholder={t("act.namePlaceholder")}
           />
           <input
             type="color"
             value={activityColorInput}
             onChange={(e) => setActivityColorInput(e.target.value)}
-            aria-label="活动颜色"
+            aria-label={t("act.colorLabel")}
           />
           <button type="button" onClick={() => void saveActivity()}>
-            {editingActivityId ? "保存活动" : "添加活动"}
+            {editingActivityId ? t("act.save") : t("act.add")}
           </button>
           <button type="button" className="secondary" onClick={startCreate}>
-            重置
+            {t("act.reset")}
           </button>
         </div>
       </section>
 
       <section className="card">
-        <h3 style={{ marginTop: 0 }}>活动列表</h3>
+        <h3 style={{ marginTop: 0 }}>{t("act.list")}</h3>
         <div style={{ display: "grid", gap: "2px" }}>
           {activities.map((activity) => (
             <div
@@ -137,9 +140,9 @@ export default function ActivitiesPage() {
             >
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: activity.color, flexShrink: 0 }} />
-                <span style={{ fontSize: "0.9rem" }}>{activity.name}</span>
+                <span style={{ fontSize: "0.9rem" }}>{tActivity(activity.name)}</span>
                 {activity.isPreset ? (
-                  <span style={{ fontSize: "0.7rem", color: "var(--muted)", background: "var(--bg)", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>预定义</span>
+                  <span style={{ fontSize: "0.7rem", color: "var(--muted)", background: "var(--bg)", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>{t("act.preset")}</span>
                 ) : null}
               </div>
               {!activity.isPreset ? (
@@ -150,7 +153,7 @@ export default function ActivitiesPage() {
                     style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem" }}
                     onClick={() => startEdit(activity)}
                   >
-                    编辑
+                    {t("act.edit")}
                   </button>
                   <button
                     type="button"
@@ -158,7 +161,7 @@ export default function ActivitiesPage() {
                     style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem" }}
                     onClick={() => void deleteActivity(activity.id)}
                   >
-                    删除
+                    {t("act.delete")}
                   </button>
                 </div>
               ) : null}

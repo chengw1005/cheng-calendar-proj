@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { useI18n } from "@/lib/i18n-context";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export default function ForgotPasswordPage() {
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -33,37 +35,37 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="authCard card">
-      <h2 style={{ marginTop: 0, textAlign: "center" }}>忘记密码</h2>
+      <h2 style={{ marginTop: 0, textAlign: "center" }}>{t("forgot.title")}</h2>
 
       {success ? (
         <div style={{ textAlign: "center" }}>
           <p style={{ color: "var(--accent)" }}>
-            重置密码的邮件已发送到 <strong>{email}</strong>，请查收邮箱并点击链接重置密码。
+            {t("forgot.emailSent")} <strong>{email}</strong>。{t("forgot.checkInbox")}
           </p>
           <div className="authLinks">
-            <Link href="/login">返回登录</Link>
+            <Link href="/login">{t("forgot.backToLogin")}</Link>
           </div>
         </div>
       ) : (
         <>
           <p style={{ color: "var(--muted)", fontSize: "0.9rem", textAlign: "center" }}>
-            输入你的注册邮箱，我们会发送重置密码的链接。
+            {t("forgot.desc")}
           </p>
           <form onSubmit={(e) => void handleSubmit(e)} className="authForm">
             <input
               type="email"
-              placeholder="邮箱地址"
+              placeholder={t("login.email")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
             {error ? <p className="authError">{error}</p> : null}
             <button type="submit" disabled={loading}>
-              {loading ? "发送中..." : "发送重置邮件"}
+              {loading ? t("forgot.loading") : t("forgot.submit")}
             </button>
           </form>
           <div className="authLinks">
-            <Link href="/login">返回登录</Link>
+            <Link href="/login">{t("forgot.backToLogin")}</Link>
           </div>
         </>
       )}

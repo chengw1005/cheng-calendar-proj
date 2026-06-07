@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { useI18n } from "@/lib/i18n-context";
+import { monthLabels as monthLabelsByLocale, weekdays as dayLabelsByLocale } from "@/lib/i18n";
+
 type Activity = {
   id: string;
   name: string;
@@ -70,10 +73,11 @@ function heatColor(count: number, max: number): string {
   return "#216e39";
 }
 
-const MONTH_LABELS = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
-const DAY_LABELS = ["日", "一", "二", "三", "四", "五", "六"];
 
 export default function StatsPage() {
+  const { locale, t, tActivity } = useI18n();
+  const MONTH_LABELS = monthLabelsByLocale[locale];
+  const DAY_LABELS = dayLabelsByLocale[locale];
   const [activities, setActivities] = useState<Activity[]>([]);
   const [activityId, setActivityId] = useState("");
   const [stats, setStats] = useState<StatsResponse | null>(null);
@@ -141,14 +145,14 @@ export default function StatsPage() {
       }
     }
     return markers;
-  }, [weeks]);
+  }, [weeks, MONTH_LABELS]);
 
   async function handleExport() {
     setExporting(true);
     try {
       const res = await fetch("/api/export");
       if (!res.ok) {
-        alert("导出失败");
+        alert(t("stats.exportFailed"));
         return;
       }
       const blob = await res.blob();
@@ -169,14 +173,14 @@ export default function StatsPage() {
 
   return (
     <main className="card">
-      <h2>统计</h2>
+      <h2>{t("stats.title")}</h2>
 
       {/* ─── GitHub-style heatmap ─── */}
       {heatmap ? (
         <div className="card" style={{ marginTop: "1rem", overflowX: "auto" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
             <p style={{ margin: 0 }}>
-              过去一年共 <strong>{totalEntries}</strong> 条记录，覆盖 <strong>{activeDays}</strong> 天
+              <strong>{totalEntries}</strong> {t("stats.yearSummary")} <strong>{activeDays}</strong> {t("stats.days")}
             </p>
             <button
               type="button"
@@ -185,7 +189,7 @@ export default function StatsPage() {
               disabled={exporting}
               onClick={() => void handleExport()}
             >
-              {exporting ? "导出中..." : "导出 CSV"}
+              {exporting ? t("stats.exporting") : t("stats.exportCsv")}
             </button>
           </div>
 
@@ -226,7 +230,7 @@ export default function StatsPage() {
                 {week.map((day, di) => (
                   <div
                     key={di}
-                    title={day.date ? `${day.date}: ${day.count} 条` : ""}
+                    title={day.date ? `${day.date}: ${day.count} ${t("stats.entries")}` : ""}
                     style={{
                       width: "12px",
                       height: "12px",
@@ -241,7 +245,7 @@ export default function StatsPage() {
 
           {/* legend */}
           <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "0.5rem", justifyContent: "flex-end" }}>
-            <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>少</span>
+            <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>{t("stats.less")}</span>
             {[0, 1, 2, 3, 4].map((level) => (
               <div
                 key={level}
@@ -253,7 +257,7 @@ export default function StatsPage() {
                 }}
               />
             ))}
-            <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>多</span>
+            <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>{t("stats.more")}</span>
           </div>
         </div>
       ) : null}
@@ -263,7 +267,7 @@ export default function StatsPage() {
         <select value={activityId} onChange={(e) => setActivityId(e.target.value)}>
           {activities.map((a) => (
             <option key={a.id} value={a.id}>
-              {a.name}
+              {tActivity(a.name)}
             </option>
           ))}
         </select>
@@ -272,15 +276,15 @@ export default function StatsPage() {
       {stats ? (
         <>
           <div className="card" style={{ marginTop: "1rem" }}>
-            <p>最近 30 天次数: {stats.last30Days.count}</p>
+            <p>{t("stats.last30")}: {stats.last30Days.count}</p>
             <p>
-              时间范围: {stats.last30Days.fromDate} ~ {stats.last30Days.toDate}
+              {t("stats.range")}: {stats.last30Days.fromDate} ~ {stats.last30Days.toDate}
             </p>
           </div>
 
           <div className="card" style={{ marginTop: "1rem" }}>
             <p style={{ marginTop: 0 }}>
-              过去一年: {stats.trailingYear.fromMonth} ~ {stats.trailingYear.toMonth}
+              {t("stats.pastYear")}: {stats.trailingYear.fromMonth} ~ {stats.trailingYear.toMonth}
             </p>
             <div
               style={{

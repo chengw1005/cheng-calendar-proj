@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useI18n } from "@/lib/i18n-context";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export default function RegisterPage() {
+  const { t } = useI18n();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +21,7 @@ export default function RegisterPage() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("两次输入的密码不一致");
+      setError(t("reg.mismatch"));
       return;
     }
 
@@ -43,7 +45,7 @@ export default function RegisterPage() {
     });
 
     if (loginError) {
-      setError("注册成功，但自动登录失败。请前往登录页面手动登录。");
+      setError(t("reg.autoLoginFailed"));
       setLoading(false);
       return;
     }
@@ -54,19 +56,19 @@ export default function RegisterPage() {
 
   return (
     <main className="authCard card">
-      <h2 style={{ marginTop: 0, textAlign: "center" }}>注册</h2>
+      <h2 style={{ marginTop: 0, textAlign: "center" }}>{t("reg.title")}</h2>
 
       <form onSubmit={(e) => void handleRegister(e)} className="authForm">
         <input
           type="email"
-          placeholder="邮箱地址"
+          placeholder={t("login.email")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
         <input
           type="password"
-          placeholder="密码 (至少 6 位)"
+          placeholder={t("reg.password")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -74,7 +76,7 @@ export default function RegisterPage() {
         />
         <input
           type="password"
-          placeholder="确认密码"
+          placeholder={t("reg.confirmPwd")}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
@@ -82,12 +84,12 @@ export default function RegisterPage() {
         />
         {error ? <p className="authError">{error}</p> : null}
         <button type="submit" disabled={loading}>
-          {loading ? "注册中..." : "注册"}
+          {loading ? t("reg.loading") : t("reg.submit")}
         </button>
       </form>
 
       <div className="authLinks">
-        <Link href="/login">已有账号？去登录</Link>
+        <Link href="/login">{t("reg.hasAccount")}</Link>
       </div>
     </main>
   );

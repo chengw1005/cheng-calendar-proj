@@ -3,6 +3,9 @@
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
+import { useI18n } from "@/lib/i18n-context";
+import { weekdays as weekdaysByLocale, monthFormat } from "@/lib/i18n";
+
 type Activity = {
   id: string;
   name: string;
@@ -18,6 +21,7 @@ type Entry = {
 };
 
 export default function CalendarPage() {
+  const { locale, t, tActivity } = useI18n();
   const [month, setMonth] = useState(dayjs().format("YYYY-MM"));
   const [entries, setEntries] = useState<Entry[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -29,7 +33,8 @@ export default function CalendarPage() {
     () => dayjs().format("YYYY-MM-DD"),
     () => ""
   );
-  const weekdayLabels = ["日", "一", "二", "三", "四", "五", "六"];
+  const weekdayLabels = weekdaysByLocale[locale];
+  const fmt = monthFormat[locale];
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 640px)");
@@ -59,14 +64,14 @@ export default function CalendarPage() {
         const firstWeekday = monthDate.day();
         return {
           key: monthDate.format("YYYY-MM"),
-          label: monthDate.format("YYYY 年 M 月"),
+          label: monthDate.format(fmt),
           cells: [
             ...Array.from({ length: firstWeekday }, () => null),
             ...Array.from({ length: total }, (_, i) => monthDate.date(i + 1).format("YYYY-MM-DD")),
           ],
         };
       }),
-    [visibleMonths]
+    [visibleMonths, fmt]
   );
 
   useEffect(() => {
@@ -176,7 +181,7 @@ export default function CalendarPage() {
         <button type="button" className="secondary" onClick={() => setMonth(dayjs(`${month}-01`).subtract(1, "month").format("YYYY-MM"))}>
           &lt;
         </button>
-        <div style={{ fontWeight: 600 }}>{dayjs(`${month}-01`).format("YYYY 年 M 月")}</div>
+        <div style={{ fontWeight: 600 }}>{dayjs(`${month}-01`).format(fmt)}</div>
         <button type="button" className="secondary" onClick={() => setMonth(dayjs(`${month}-01`).add(1, "month").format("YYYY-MM"))}>
           &gt;
         </button>
@@ -247,7 +252,7 @@ export default function CalendarPage() {
             style={{ width: "100%", maxWidth: "420px", justifySelf: "center", alignSelf: "center" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ marginTop: 0, marginBottom: "0.5rem" }}>日期: {selectedDate}</h3>
+            <h3 style={{ marginTop: 0, marginBottom: "0.5rem" }}>{t("cal.date")}: {selectedDate}</h3>
             <div style={{ display: "grid", gap: "2px" }}>
               {activities.map((activity) => {
                 const currentEntry = selectedEntryByActivityId.get(activity.id);
@@ -270,7 +275,7 @@ export default function CalendarPage() {
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: activity.color, flexShrink: 0 }} />
-                      <span style={{ fontSize: "0.9rem" }}>{activity.name}</span>
+                      <span style={{ fontSize: "0.9rem" }}>{tActivity(activity.name)}</span>
                     </div>
                     <button
                       type="button"
@@ -278,7 +283,7 @@ export default function CalendarPage() {
                       style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem" }}
                       onClick={action}
                     >
-                      {isMarked ? "取消" : "标记"}
+                      {isMarked ? t("cal.unmark") : t("cal.mark")}
                     </button>
                   </div>
                 );
