@@ -24,8 +24,12 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState("");
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const today = dayjs().format("YYYY-MM-DD");
+  const [today, setToday] = useState("");
   const weekdayLabels = ["日", "一", "二", "三", "四", "五", "六"];
+
+  useEffect(() => {
+    setToday(dayjs().format("YYYY-MM-DD"));
+  }, []);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 640px)");
