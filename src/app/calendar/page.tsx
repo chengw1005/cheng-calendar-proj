@@ -1,7 +1,7 @@
 "use client";
 
 import dayjs from "dayjs";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 type Activity = {
   id: string;
@@ -24,12 +24,12 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState("");
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [today, setToday] = useState("");
+  const today = useSyncExternalStore(
+    () => () => {},
+    () => dayjs().format("YYYY-MM-DD"),
+    () => ""
+  );
   const weekdayLabels = ["日", "一", "二", "三", "四", "五", "六"];
-
-  useEffect(() => {
-    setToday(dayjs().format("YYYY-MM-DD"));
-  }, []);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 640px)");
