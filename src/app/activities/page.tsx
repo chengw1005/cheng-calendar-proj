@@ -122,30 +122,46 @@ export default function ActivitiesPage() {
 
       <section className="card">
         <h3 style={{ marginTop: 0 }}>活动列表</h3>
-        <div style={{ display: "grid", gap: "0.75rem" }}>
+        <div style={{ display: "grid", gap: "2px" }}>
           {activities.map((activity) => (
             <div
               key={activity.id}
-              className="card"
-              style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "0.4rem 0.5rem",
+                borderRadius: "6px",
+                background: editingActivityId === activity.id ? "#f0f9ff" : "transparent",
+              }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <span className="dot" style={{ background: activity.color, marginTop: 0 }} />
-                <div>
-                  <div>{activity.name}</div>
-                  <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-                    {activity.isPreset ? "预定义活动" : "自定义活动"}
-                  </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: activity.color, flexShrink: 0 }} />
+                <span style={{ fontSize: "0.9rem" }}>{activity.name}</span>
+                {activity.isPreset ? (
+                  <span style={{ fontSize: "0.7rem", color: "var(--muted)", background: "var(--bg)", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>预定义</span>
+                ) : null}
+              </div>
+              {!activity.isPreset ? (
+                <div style={{ display: "flex", gap: "0.35rem" }}>
+                  <button
+                    type="button"
+                    className="secondary"
+                    style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem" }}
+                    onClick={() => startEdit(activity)}
+                  >
+                    编辑
+                  </button>
+                  <button
+                    type="button"
+                    className="danger"
+                    style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem" }}
+                    onClick={() => void deleteActivity(activity.id)}
+                  >
+                    删除
+                  </button>
                 </div>
-              </div>
-              <div className="controls">
-                <button type="button" className="secondary" onClick={() => startEdit(activity)}>
-                  编辑
-                </button>
-                <button type="button" className="danger" onClick={() => void deleteActivity(activity.id)}>
-                  删除
-                </button>
-              </div>
+              ) : null}
             </div>
           ))}
         </div>

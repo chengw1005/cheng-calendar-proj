@@ -1,8 +1,10 @@
+import { type SupabaseClient } from "@supabase/supabase-js";
 import dayjs from "dayjs";
 
 import { ApiError } from "@/lib/errors";
 import { makeId } from "@/lib/id";
-import { getSupabaseClient, hasSupabaseEnv } from "@/lib/supabase";
+import { hasSupabaseEnv } from "@/lib/supabase";
+import { getSupabaseServerClient } from "@/lib/supabase-server";
 import {
   Activity,
   CalendarEntry,
@@ -25,6 +27,8 @@ export interface CalendarRepository {
   countDistinctDaysByActivity(activityId: string, fromDate: string): Promise<number>;
   countEntriesByActivityInRange(activityId: string, fromDate: string, toDate: string): Promise<number>;
   getMonthlyEntryCountsByActivity(activityId: string, endingMonth: string, monthCount: number): Promise<Array<{ month: string; count: number }>>;
+  getDailyEntryCounts(fromDate: string, toDate: string): Promise<Array<{ date: string; count: number }>>;
+  listEntriesWithActivity(fromDate: string, toDate: string): Promise<Array<{ date: string; title: string; activityName: string; note?: string }>>;
 }
 
 type Store = {
@@ -50,7 +54,7 @@ type EntryRow = {
   updated_at: string;
 };
 
-const presetActivities: Omit<Activity, "id" | "createdAt">[] = [
+export const presetActivities: Omit<Activity, "id" | "createdAt">[] = [
   { name: "运动", color: "#22c55e", isPreset: true },
   { name: "学习", color: "#3b82f6", isPreset: true },
   { name: "阅读", color: "#f59e0b", isPreset: true },
@@ -214,6 +218,30 @@ export class InMemoryCalendarRepository implements CalendarRepository {
       return { month, count };
     });
   }
+
+  async getDailyEntryCounts(fromDate: string, toDate: string): Promise<Array<{ date: string; count: number }>> {
+    const counts = new Map<string, number>();
+    for (const entry of this.store.entries) {
+      const d = entry.entryDate;
+      if (d >= fromDate && d <= toDate) {
+        counts.set(d, (counts.get(d) ?? 0) + 1);
+      }
+    }
+    return Array.from(counts.entries(), ([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  async listEntriesWithActivity(fromDate: string, toDate: string): Promise<Array<{ date: string; title: string; activityName: string; note?: string }>> {
+    const actMap = new Map(this.store.activities.map((a) => [a.id, a.name]));
+    return this.store.entries
+      .filter((e) => e.entryDate >= fromDate && e.entryDate <= toDate)
+      .sort((a, b) => a.entryDate.localeCompare(b.entryDate))
+      .map((e) => ({
+        date: e.entryDate,
+        title: e.title,
+        activityName: actMap.get(e.activityId ?? "") ?? "",
+        note: e.note,
+      }));
+  }
 }
 
 function mapActivityRow(row: ActivityRow): Activity {
@@ -239,7 +267,11 @@ function mapEntryRow(row: EntryRow): CalendarEntry {
 }
 
 export class SupabaseCalendarRepository implements CalendarRepository {
-  private supabase = getSupabaseClient();
+  private supabase: SupabaseClient;
+
+  constructor(client: SupabaseClient) {
+    this.supabase = client;
+  }
 
   async listActivities(): Promise<Activity[]> {
     const { data, error } = await this.supabase.from("activities").select("*").order("created_at", { ascending: true });
@@ -479,15 +511,76 @@ export class SupabaseCalendarRepository implements CalendarRepository {
       return { month, count: counts.get(month) ?? 0 };
     });
   }
+
+  async getDailyEntryCounts(fromDate: string, toDate: string): Promise<Array<{ date: string; count: number }>> {
+    const { data, error } = await this.supabase
+      .from("calendar_entries")
+      .select("entry_date")
+      .gte("entry_date", fromDate)
+      .lte("entry_date", toDate)
+      .order("entry_date", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    const counts = new Map<string, number>();
+    for (const row of data ?? []) {
+      const d = (row as { entry_date: string }).entry_date;
+      counts.set(d, (counts.get(d) ?? 0) + 1);
+    }
+    return Array.from(counts.entries(), ([date, count]) => ({ date, count }));
+  }
+
+  async listEntriesWithActivity(fromDate: string, toDate: string): Promise<Array<{ date: string; title: string; activityName: string; note?: string }>> {
+    const { data, error } = await this.supabase
+      .from("calendar_entries")
+      .select("entry_date, title, note, activities(name)")
+      .gte("entry_date", fromDate)
+      .lte("entry_date", toDate)
+      .order("entry_date", { ascending: true })
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []).map((row) => {
+      const r = row as unknown as { entry_date: string; title: string; note: string | null; activities: { name: string } | null };
+      return {
+        date: r.entry_date,
+        title: r.title,
+        activityName: r.activities?.name ?? "",
+        note: r.note ?? undefined,
+      };
+    });
+  }
 }
 
 const globalForRepo = globalThis as typeof globalThis & {
   calendarRepo?: CalendarRepository;
 };
 
-export function getCalendarRepository(): CalendarRepository {
+export async function getCalendarRepository(): Promise<CalendarRepository> {
+  if (hasSupabaseEnv()) {
+    const supabase = await getSupabaseServerClient();
+    return new SupabaseCalendarRepository(supabase);
+  }
   if (!globalForRepo.calendarRepo) {
-    globalForRepo.calendarRepo = hasSupabaseEnv() ? new SupabaseCalendarRepository() : new InMemoryCalendarRepository();
+    globalForRepo.calendarRepo = new InMemoryCalendarRepository();
   }
   return globalForRepo.calendarRepo;
+}
+
+export async function initPresetActivities(supabase: SupabaseClient): Promise<void> {
+  const { data } = await supabase.from("activities").select("id").limit(1);
+  if (data && data.length > 0) {
+    return;
+  }
+  const rows = presetActivities.map((a) => ({
+    name: a.name,
+    color: a.color,
+    is_preset: a.isPreset,
+  }));
+  await supabase.from("activities").insert(rows);
 }

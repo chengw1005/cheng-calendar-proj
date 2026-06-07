@@ -5,7 +5,7 @@ import { ApiError } from "@/lib/errors";
 
 export async function GET() {
   try {
-    const repo = getCalendarRepository();
+    const repo = await getCalendarRepository();
     const activities = await repo.listActivities();
     return ok(activities);
   } catch (error) {
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const input = createActivitySchema.parse(body);
 
-    const repo = getCalendarRepository();
+    const repo = await getCalendarRepository();
     const created = await repo.createActivity(input);
     return ok(created, 201);
   } catch (error) {
@@ -39,7 +39,7 @@ export async function PUT(req: Request) {
       throw new ApiError("VALIDATION_ERROR", "id is required", 400);
     }
 
-    const repo = getCalendarRepository();
+    const repo = await getCalendarRepository();
     const updated = await repo.updateActivity(id, input);
     return ok(updated);
   } catch (error) {
@@ -56,7 +56,7 @@ export async function DELETE(req: Request) {
       throw new ApiError("VALIDATION_ERROR", "id is required", 400);
     }
 
-    const repo = getCalendarRepository();
+    const repo = await getCalendarRepository();
     await repo.deleteActivity(id);
     return ok({ success: true });
   } catch (error) {

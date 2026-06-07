@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     const last30DaysFrom = subtractDays(toDate, 29);
     const endingMonth = dayjs(toDate).format("YYYY-MM");
 
-    const repo = getCalendarRepository();
+    const repo = await getCalendarRepository();
     const last30DaysCount = await repo.countEntriesByActivityInRange(parsed.activityId, last30DaysFrom, toDate);
     const monthlyCounts = await repo.getMonthlyEntryCountsByActivity(parsed.activityId, endingMonth, 12);
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { hasSupabaseEnv, getSupabaseClient } from "@/lib/supabase";
+import { hasSupabaseEnv } from "@/lib/supabase";
+import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 export const dynamic = "force-dynamic";
 
@@ -23,8 +24,8 @@ export async function GET() {
   }
 
   try {
-    const supabase = getSupabaseClient();
-    const { error } = await supabase.from("calendar_entries").select("id").limit(1);
+    const supabase = await getSupabaseServerClient();
+    const { error } = await supabase.from("activities").select("id").limit(1);
     if (error) {
       status.error = error.message;
     } else {

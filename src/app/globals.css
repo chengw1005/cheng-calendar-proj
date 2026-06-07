@@ -121,6 +121,45 @@ button.danger {
   background: var(--danger);
 }
 
+.topBar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.authCard {
+  max-width: 420px;
+  margin: 3rem auto;
+}
+
+.authForm {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.authError {
+  color: var(--danger);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.authLinks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--accent);
+}
+
+.authLinks a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
 @media (max-width: 640px) {
   .container {
     padding: 0.75rem;

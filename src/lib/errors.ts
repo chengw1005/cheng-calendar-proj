@@ -1,6 +1,7 @@
 export type ApiErrorCode =
   | "VALIDATION_ERROR"
   | "NOT_FOUND"
+  | "UNAUTHORIZED"
   | "INTERNAL_ERROR";
 
 export class ApiError extends Error {

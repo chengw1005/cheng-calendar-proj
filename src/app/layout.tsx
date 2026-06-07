@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import "./globals.css";
+import { LayoutShell } from "./layout-shell";
 
 export const metadata: Metadata = {
-  title: "Online Calendar MVP",
-  description: "Mark daily activities, search entries, and view stats.",
+  title: "日历打卡",
+  description: "每日活动打卡、日历记录与数据统计",
 };
 
 export default function RootLayout({
@@ -16,15 +16,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body>
-        <div className="container">
-          {children}
-          <nav className="card bottomNav" style={{ marginTop: "1rem" }}>
-            <Link href="/calendar">月历</Link>
-            <Link href="/activities">活动管理</Link>
-            <Link href="/search">日期搜索</Link>
-            <Link href="/stats">统计</Link>
-          </nav>
-        </div>
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   );
