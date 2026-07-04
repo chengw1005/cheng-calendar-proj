@@ -1,10 +1,10 @@
 export type Locale = "en" | "zh";
 
 export const presetActivityNames: Record<string, Record<Locale, string>> = {
-  "运动": { en: "Exercise", zh: "运动" },
-  "学习": { en: "Study", zh: "学习" },
-  "阅读": { en: "Reading", zh: "阅读" },
-  "旅行": { en: "Travel", zh: "旅行" },
+  "俯卧撑": { en: "Push-ups", zh: "俯卧撑" },
+  "引体向上": { en: "Pull-ups", zh: "引体向上" },
+  "深蹲": { en: "Squats", zh: "深蹲" },
+  "爬行": { en: "Crawling", zh: "爬行" },
 };
 
 export const weekdays: Record<Locale, string[]> = {

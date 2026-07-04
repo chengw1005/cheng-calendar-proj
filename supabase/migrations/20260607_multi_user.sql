@@ -65,10 +65,10 @@ as $$
 begin
   insert into public.activities (user_id, name, color, is_preset)
   values
-    (new.id, '运动', '#22c55e', true),
-    (new.id, '学习', '#3b82f6', true),
-    (new.id, '阅读', '#f59e0b', true),
-    (new.id, '旅行', '#ef4444', true);
+    (new.id, '俯卧撑', '#22c55e', true),
+    (new.id, '引体向上', '#3b82f6', true),
+    (new.id, '深蹲', '#f59e0b', true),
+    (new.id, '爬行', '#ef4444', true);
   return new;
 end;
 $$;
